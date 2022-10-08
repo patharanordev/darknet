@@ -190,7 +190,6 @@ void validate_yolo(char *cfgfile, char *weightfile)
         }
     }
 
-    if (fps) free(fps);
     if (val) free(val);
     if (val_resized) free(val_resized);
     if (buf) free(buf);
@@ -198,10 +197,12 @@ void validate_yolo(char *cfgfile, char *weightfile)
     if (thr) free(thr);
 
     fprintf(stderr, "Total Detection Time: %f Seconds\n", (double)(time(0) - start));
-    for(j = 0; j < classes; ++j){
-        fclose(fps[j]);
+    if (fps) {
+        for(j = 0; j < classes; ++j){
+            fclose(fps[j]);
+        }
+        free(fps);
     }
-    free(fps);
 }
 
 void validate_yolo_recall(char *cfgfile, char *weightfile)
@@ -277,6 +278,7 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
         free(id);
+        free(truth);
         free_image(orig);
         free_image(sized);
     }
@@ -363,6 +365,6 @@ void run_yolo(int argc, char **argv)
     else if(0==strcmp(argv[2], "train")) train_yolo(cfg, weights);
     else if(0==strcmp(argv[2], "valid")) validate_yolo(cfg, weights);
     else if(0==strcmp(argv[2], "recall")) validate_yolo_recall(cfg, weights);
-    else if(0==strcmp(argv[2], "demo")) demo(cfg, weights, thresh, hier_thresh, cam_index, filename, voc_names, 20, frame_skip,
-		prefix, out_filename, mjpeg_port, json_port, dont_show, ext_output, 0, 0, 0, 0, 0);
+    else if(0==strcmp(argv[2], "demo")) demo(cfg, weights, thresh, hier_thresh, cam_index, filename, voc_names, 20, 1, frame_skip,
+		prefix, out_filename, mjpeg_port, 0, json_port, dont_show, ext_output, 0, 0, 0, 0, 0);
 }
